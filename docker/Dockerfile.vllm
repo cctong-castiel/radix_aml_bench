@@ -1,0 +1,36 @@
+# nvidia/cuda:12.9.1-devel-ubuntu24.04
+FROM nvidia/cuda:12.9.1-devel-ubuntu24.04
+
+# set environment variables
+ENV DEBIAN_FRONTEND=noninteractive \
+    PYTHONUNBUFFERED=1 \
+    UV_SYSTEM_PYTHON=1
+
+# Install Python 3.12 and dependencies
+RUN apt-get update && \
+    apt-get install -y --no-install-recommends \
+    python3.12 \
+    python3.12-dev \
+    python3.12-distutils \
+    python3-pip \
+    build-essential \
+    libnuma1 \
+    && rm -rf /var/lib/apt/lists/* \
+    && ln -sf /usr/bin/python3.12 /usr/bin/python3 \
+    && curl -LsSf https://astral.sh/uv/install.sh | sh
+
+# set path
+ENV PATH="/root/.local/bin:${PATH}"
+
+# Install vLLM
+RUN uv pip install --no-cache "vllm==0.32.0" \
+    --extra-index-url https://download.pytorch.org/whl/cu129
+
+# expose port 8000
+EXPOSE 8000
+
+# entrypoint
+ENTRYPOINT ["vllm", "serve"]
+
+# cmd
+CMD ["Qwen/Qwen2.5-7B-Instruct", "--host", "0.0.0.0", "--port", "8000", "--gpu-memory-utilization", "0.85", "--no-enable-prefix-caching"]

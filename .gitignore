@@ -1,0 +1,109 @@
+### --- Python Core --- ###
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# C extensions
+*.so
+
+### --- Environments --- ###
+# Virtual environments
+.venv/
+venv/
+env/
+bin/
+lib/
+include/
+# For specialized environments
+.env
+.venv
+pip-wheel-metadata/
+
+### --- MLOps & Data (Important for your project) --- ###
+# Local models and large artifacts (Avoid pushing GBs to Git)
+models/
+artifacts/
+*.bin
+*.pt
+*.pth
+*.onnx
+*.weights
+*.h5
+*.ckpt
+
+# Data and large CSVs
+data/
+*.csv
+*.jsonl
+*.parquet
+
+### --- Logging & Monitoring --- ###
+# Log files
+*.log
+logs/
+pip-log.txt
+pip-delete-this-directory.txt
+
+### --- IDE & Editor Settings --- ###
+# VS Code
+.vscode/
+!.vscode/settings.json
+!.vscode/tasks.json
+!.vscode/launch.json
+!.vscode/extensions.json
+*.code-workspace
+
+# PyCharm
+.idea/
+
+### --- Distribution / Packaging --- ###
+.Python
+build/
+develop-eggs/
+dist/
+downloads/
+eggs/
+.eggs/
+lib64/
+parts/
+sdist/
+var/
+wheels/
+share/python-wheels/
+*.egg-info/
+.installed.cfg
+*.egg
+MANIFEST
+
+### --- OS Specific --- ###
+.DS_Store
+Thumbs.db
+
+### Terraform
+*.tfstate
+*.tfstate.*
+.terraform/
+.terraform.lock.hcl
+*.tfvars
+!*.tfvars.example
+.tfvars
+.terraform/
+*.tfstate.backup
+.terraform.tfstate
+.terraform.tfstate.backup
+.terraform.lock.hcl
+
+### database
+papers.db
+
+### tests/output
+tests/output/academic_graph.html
+tests/output/test.json
+
+### scan results
+scan_results/snyk/*
+
+# dev container
+.devcontainer/
