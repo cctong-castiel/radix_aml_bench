@@ -18,3 +18,19 @@ docker buildx build --platform linux/amd64 \
   -t <YOUR_REGISTRY>/radix-aml-vllm:v1 \
   --push .
 ```
+
+## Steps to run the containers locally
+```Shell
+# Run SGLang container on GPU 0
+docker run --gpus all --rm -p 30000:30000 \
+  --shm-size=16g \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  <YOUR_REGISTRY>/radix-aml-sglang:v1
+
+# Or run vLLM container on GPU 0 (or simultaneously on GPU 1 via --gpus '"device=1"')
+docker run --gpus all --rm -p 8000:8000 \
+  --shm-size=16g \
+  -v ~/.cache/huggingface:/root/.cache/huggingface \
+  <YOUR_REGISTRY>/radix-aml-vllm:v1
+```
+
