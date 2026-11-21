@@ -1,2 +1,7 @@
+import asyncio
+
+
 def main() -> None:
-    print("Hello from radix-aml-bench!")
+    from radix_aml_bench.main import main as _async_main
+
+    asyncio.run(_async_main())
