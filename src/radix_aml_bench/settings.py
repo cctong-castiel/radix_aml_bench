@@ -13,6 +13,7 @@ VLLM_URL = os.getenv("VLLM_BASE_URL") or "http://localhost:8000/v1"
 print(f"VLLM_URL: {VLLM_URL}")
 print(f"SGLANG_URL: {SGLANG_URL}")
 
-CONCURRENCY = int(os.getenv("CONCURRENCY") or "32")
-TOTAL_REQUESTS = int(os.getenv("TOTAL_REQUESTS") or "128")
-MAX_TOKENS = 256
+CONCURRENCY = int(os.getenv("CONCURRENCY") or "64")
+TOTAL_REQUESTS = int(os.getenv("TOTAL_REQUESTS") or "528")
+WARMUP_REQUESTS = int(os.getenv("WARMUP_REQUESTS") or "4")
+MAX_TOKENS = int(os.getenv("MAX_TOKENS") or "128")

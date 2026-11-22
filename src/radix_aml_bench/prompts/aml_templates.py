@@ -7,12 +7,12 @@ RULE AML-104 (Sanctions & PEP Screening): Any counterparty name fuzzy-matching O
 RULE AML-105 (Trade-Based Money Laundering): Over/under-invoicing of dual-use goods, commodities, or electronics shipments inconsistent with customer KYC profile triggers HIGH risk.
 """
 
-# Expand the shared context to simulate a realistic multi-page bank SOP (~2,800 tokens)
+# Expand the shared context to simulate a realistic multi-page bank SOP (~10,500 tokens)
 SHARED_SYSTEM_PROMPT = (
     "You are an automated Tier-2 Banking AML Compliance Auditor. "
     "Evaluate each wire transfer against the regulatory manual below and output ONLY valid JSON matching the schema.\n\n"
-    + "\n".join([f"[Section {i}] {BASE_AML_POLICY}" for i in range(1, 18)])
+    + "\n".join([f"[Section {i}] {BASE_AML_POLICY}" for i in range(1, 51)])
 )
 
-# User prompt
-user_prompt = "Audit this wire transfer (Request #{0}):\n{1}"
+# User prompt (place the variable request ID at the end to maximize prefix sharing)
+user_prompt = "Audit this wire transfer:\n{1}\n[Audit Reference #{0}]"

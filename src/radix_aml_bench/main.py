@@ -9,12 +9,12 @@ logger = logging.getLogger(__name__)
 
 
 async def main():
-    sglang_engine = Engine(name="SGLang (RadixAttention)", url=SGLANG_URL, api_key=SGLANG_API_KEY)
+    sglang_engine = Engine(name="SGLang", url=SGLANG_URL, api_key=SGLANG_API_KEY)
     vllm_engine = Engine(name="vLLM (Baseline)", url=VLLM_URL, api_key=VLLM_API_KEY)
 
     # run the engine main method
-    sglang_results = await sglang_engine.run_benchmark(domain_name="aml")
     vllm_results = await vllm_engine.run_benchmark(domain_name="aml")
+    sglang_results = await sglang_engine.run_benchmark(domain_name="aml")
 
     # show results
     logger.info("SGLang and vLLM results comparison")
