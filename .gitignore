@@ -107,3 +107,6 @@ scan_results/snyk/*
 
 # dev container
 .devcontainer/
+
+# Others
+credentials/

@@ -4,16 +4,19 @@ FROM nvidia/cuda:12.9.1-devel-ubuntu24.04
 # set environment variables
 ENV DEBIAN_FRONTEND=noninteractive \
     PYTHONUNBUFFERED=1 \
-    UV_SYSTEM_PYTHON=1
+    UV_SYSTEM_PYTHON=1 \
+    UV_BREAK_SYSTEM_PACKAGES=1
 
 # Install Python 3.12 and dependencies
 RUN apt-get update && apt-get install -y --no-install-recommends \
     python3.12 \
     python3.12-dev \
-    python3.12-distutils \
     python3-pip \
+    python3-setuptools \
     build-essential \
     libnuma1 \
+    curl \
+    ca-certificates \
     && rm -rf /var/lib/apt/lists/* \
     && ln -sf /usr/bin/python3.12 /usr/bin/python3 \
     && curl -LsSf https://astral.sh/uv/install.sh | sh
@@ -31,4 +34,4 @@ EXPOSE 30000
 ENTRYPOINT ["python3", "-m", "sglang.launch_server"]
 
 # cmd
-CMD ["--model-path", Qwen/Qwen2.5-7B-Instruct", "--host", "0.0.0.0", "--port", "30000", "--mem-fraction-static", "0.85", "--enable-metrics"]
+CMD ["--model-path", "Qwen/Qwen2.5-7B-Instruct", "--host", "0.0.0.0", "--port", "30000", "--mem-fraction-static", "0.85", "--enable-metrics"]
