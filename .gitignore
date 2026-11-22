@@ -110,3 +110,4 @@ scan_results/snyk/*
 
 # Others
 credentials/
+policies/

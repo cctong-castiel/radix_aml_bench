@@ -3,7 +3,7 @@ import logging
 import time
 
 from openai import AsyncOpenAI
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ValidationError
 
 from radix_aml_bench.domains import ResponseRegistry, SampleRegistry
 from radix_aml_bench.prompts import SystemPromptRegistry, UserPromptRegistry
@@ -43,7 +43,8 @@ async def run_llm_request(
         logger.info(f"Running LLM request {request_id}")
         start_time = time.perf_counter()
         ttft = None
-        chunks = []
+        chunks: list[str] = []
+        output_tokens: int | None = None
 
         response = await client.chat.completions.create(
             model=MODEL_NAME,
@@ -62,24 +63,33 @@ async def run_llm_request(
                 },
             },
             stream=True,
+            stream_options={"include_usage": True},
+            timeout=900
         )
 
+        logger.info("completed API call")
         async for chunk in response:
             delta = chunk.choices[0].delta.content if chunk.choices else None
-            if ttft is None:
-                ttft = time.perf_counter() - start_time
-            chunks.append(delta)
+            if delta:
+                if ttft is None:
+                    ttft = time.perf_counter() - start_time
+                chunks.append(delta)
+            if getattr(chunk, "usage", None) is not None:
+                output_tokens = chunk.usage.completion_tokens
 
-        ttft_ms = ttft * 1000  # Simulated TTFT
-        e2e_ms = (time.perf_counter() - start_time) * 1000
-        output_tokens = response.usage.total_tokens
+        end_time = time.perf_counter() - start_time
+        ttft_ms = (ttft if ttft is not None else end_time) * 1000
+        e2e_ms = end_time * 1000
+        if output_tokens is None:
+            output_tokens = len(chunks)
 
         # validate the JSON response against the schema
-        valid_json = False  # Placeholder for actual JSON validation logic
+        valid_json = False
         full_output = "".join(chunks)
         try:
             domain_schema.model_validate_json(full_output)
-        except Exception:
+            valid_json = True
+        except ValidationError:
             valid_json = False
 
         return ResponseSchema(

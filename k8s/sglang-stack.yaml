@@ -1,0 +1,104 @@
+apiVersion: v1
+kind: Namespace
+metadata:
+  name: llm-bench
+---
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: sglang-worker
+  namespace: llm-bench
+spec:
+  serviceName: sglang-workers-headless
+  replicas: 2
+  selector:
+    matchLabels:
+      app: sglang-worker
+  template:
+    metadata:
+      labels:
+        app: sglang-worker
+      annotations:
+        prometheus.io/scrape: "true"
+        prometheus.io/port: "30000"
+    spec:
+      tolerations:
+        - key: nvidia.com/gpu
+          operator: Exists
+          effect: NoSchedule
+      containers:
+        - name: sglang
+          image: 527222288362.dkr.ecr.ap-south-1.amazonaws.com/radix-aml-sglang
+          ports:
+            - containerPort: 30000
+          resources:
+            limits:
+              nvidia.com/gpu: 1
+          volumeMounts:
+            - name: dshm
+              mountPath: /dev/shm
+      volumes:
+        - name: dshm
+          emptyDir:
+            medium: Memory
+            sizeLimit: 16Gi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sglang-workers-headless
+  namespace: llm-bench
+spec:
+  clusterIP: None
+  selector:
+    app: sglang-worker
+  ports:
+    - port: 30000
+      targetPort: 30000
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sglang-router
+  namespace: llm-bench
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: sglang-router
+  template:
+    metadata:
+      labels:
+        app: sglang-router
+    spec:
+      containers:
+        - name: router
+          image: 527222288362.dkr.ecr.ap-south-1.amazonaws.com/radix-aml-sglang
+          entrypoint: ["python3", "-m", "sglang_router.launch_router"]
+          args:
+            - "--worker-urls"
+            - "http://sglang-worker-0.sglang-workers-headless.llm-bench.svc.cluster.local:30000"
+            - "http://sglang-worker-1.sglang-workers-headless.llm-bench.svc.cluster.local:30000"
+            - "--host"
+            - "0.0.0.0"
+            - "--port"
+            - "8000"
+          ports:
+            - containerPort: 8000
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: sglang-router-lb
+  namespace: llm-bench
+  annotations:
+    service.beta.kubernetes.io/aws-load-balancer-type: "external"
+    service.beta.kubernetes.io/aws-load-balancer-nlb-target-type: "ip"
+    service.beta.kubernetes.io/aws-load-balancer-scheme: "internet-facing"
+spec:
+  type: LoadBalancer
+  selector:
+    app: sglang-router
+  ports:
+    - port: 80
+      targetPort: 8000

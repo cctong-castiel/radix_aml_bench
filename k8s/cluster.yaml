@@ -1,0 +1,37 @@
+apiVersion: eksctl.io/v1alpha5
+kind: ClusterConfig
+
+metadata:
+  name: radix-aml-eks
+  region: ap-south-1
+  version: "1.32"
+
+iam:
+  withOIDC: true
+
+managedNodeGroups:
+  # CPU node group for sglang-router, Ingress controllers, Prometheus & Grafana
+  - name: system-cpu-ng
+    instanceType: m6i.large
+    desiredCapacity: 2
+    privateNetworking: true
+
+  # 4 GPU nodes: 2 for SGLang replicas + 2 for vLLM replicas
+  - name: gpu-inference-ng
+    instanceType: g5.xlarge
+    amiFamily: AmazonLinux2023
+    minSize: 2
+    desiredCapacity: 4
+    maxSize: 4
+    volumeSize: 120
+    privateNetworking: true
+    labels:
+      workload: llm-inference
+    taints:
+      - key: nvidia.com/gpu
+        value: "true"
+        effect: NoSchedule
+    iam:
+      withAddonPolicies:
+        imageBuilder: true
+        ebs: true
